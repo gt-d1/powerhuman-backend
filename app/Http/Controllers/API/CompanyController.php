@@ -46,26 +46,26 @@ class CompanyController extends Controller
 
     public function create(CreateCompanyRequest $request)
     {
-        // try {
-        if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('public/logos');
+        try {
+            if ($request->hasFile('logo')) {
+                $path = $request->file('logo')->store('public/logos');
+            }
+
+            $company = Company::create([
+                'name' => $request->name,
+                'logo' => $path,
+            ]);
+
+            if (!$company) {
+                throw new Exception('Company not cerated');
+            }
+
+            $user = User::find(Auth::id());
+            $user->companies()->attach($company->id);
+
+            return ResponseFormatter::success($company, 'Company create');
+        } catch (Exception $e) {
+             return ResponseFormatter::error($e->getMessage(), 500);
         }
-
-        $company = Company::create([
-            'name' => $request->name,
-            'logo' => $path,
-        ]);
-
-        // if (!$company) {
-        //     throw new Exception('Company not cerated');
-        // }
-
-        // $user = User::find(Auth::id());
-        // $user->companies()->attach($company->id);
-
-        return ResponseFormatter::success($company, 'Company create');
-        // } catch (Exception $e) {
-        //     return ResponseFormatter::error($e->getMessage(), 500);
-        // }
     }
 }
